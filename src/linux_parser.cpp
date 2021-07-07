@@ -113,17 +113,71 @@ float LinuxParser::MemoryUtilization() {
 // TODO: Read and return the system uptime
 long LinuxParser::UpTime() { 
     string line;
-    long uptime;
+    long runningAndSuspendTime;
+    long idleTime;
     std::ifstream stream(kProcDirectory + kUptimeFilename);
     if (stream.is_open()) {
       while(std::getline(stream, line)){
         std::istringstream linestream(line);
-        linestream >> uptime;
+        linestream >> runningAndSuspendTime >> idleTime;
         break;
       }
     }
-    return uptime; 
+    return runningAndSuspendTime + idleTime; 
   }
+
+// Get process CPU usage
+float LinuxParser::ProcessCpuUsage(int pid){
+
+  string line;
+  string unusedValue;
+  long utime; // cpu time spent in the user code.
+  long stime; // cpu time spent in the kernel.
+  long cutime; // waited for children cpu time spent in user code.
+  long cstime; // waited for children cpu time spent in kernel coce.
+  long starttime; // time when the process started.
+  long uptime = UpTime();
+
+  std::ifstream stream(kProcDirectory+"/"+to_string(pid)+kStatFilename);
+  if(stream.is_open()){
+  std::getline(stream, line);
+  std::istringstream linestream(line);
+  int count = 1;
+  
+   while(linestream >> unusedValue){
+      count++;
+      if(count == 14)
+       break;
+   };
+    
+  
+  linestream >> utime >> stime >>  cutime >> cstime;
+  count = 18;
+    while(linestream >> unusedValue){
+      count++;
+      if(count == 22)
+       break;
+    };
+    
+  
+   linestream >> starttime;
+ 
+  }
+  // total time spent for the process
+  long totalTime = utime + stime + cutime + cstime;
+
+  // total time in seconds
+  //long totalTimeInSeconds = totalTime /sysconf(_SC_CLK_TCK);
+
+  // total elasped time in seconds since the process started
+  long elaspedTimeInSeconds = uptime - (starttime /sysconf(_SC_CLK_TCK));
+
+  //cpu usage in percentage
+  float usage =  (totalTime/sysconf(_SC_CLK_TCK)) * 1.0 /elaspedTimeInSeconds * 1.0;
+
+  return usage;
+  
+}
 
 // TODO: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return 0; }
@@ -144,16 +198,6 @@ vector<string> LinuxParser::CpuUtilization() {
     string line;
     string cpu;
     string value;
-    string userProcesses;
-    string nicedProcesses;
-    string systemProcesses;
-    string idle;
-    string iowait;
-    string irq;
-    string softirq;
-    string steal;
-    string guest;
-    string guestNice;
 
     std::ifstream stream(kProcDirectory + kStatFilename);
     if (stream.is_open()) {
@@ -212,20 +256,98 @@ int LinuxParser::RunningProcesses() {
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::Command(int pid) { 
+    string cmd;
+    std::ifstream stream(kProcDirectory+"/"+to_string(pid)+ kCmdlineFilename);
+    if (stream.is_open()) {
+      std:: getline(stream, cmd);
+    }
+  return cmd;
+}
 
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::Ram(int pid) { 
+    string line;
+    string value;
+    string key;
+    std::ifstream stream(kProcDirectory+"/"+to_string(pid)+ kStatusFilename);
+    if (stream.is_open()) {
+      while(std::getline(stream, line)){
+        std::istringstream linestream(line);
+        linestream >> key >> value;
+        if(key == "vmSize:"){
+          break;
+        }
+      }
+    }
+  return to_string(std::stol(value)/1024);
+}
 
 // TODO: Read and return the user ID associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::Uid(int pid) { 
+    string line;
+    string value;
+    string key;
+    std::ifstream stream(kProcDirectory+"/"+to_string(pid)+ kStatusFilename);
+    if (stream.is_open()) {
+      while(std::getline(stream, line)){
+        std::istringstream linestream(line);
+        linestream >> key >> value;
+        if(key == "Uid:"){
+          break;
+        }
+      }
+    }
+  return value;
+ }
 
 // TODO: Read and return the user associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::User(int pid) { 
+    string uid = Uid(pid);
+    string line;
+    string username;
+    string x;
+    string uid1;
+    string uid2;
+    string key;
+    std::ifstream stream(kPasswordPath);
+    if (stream.is_open()) {
+      while(std::getline(stream, line)){
+        std::replace(line.begin(), line.end(), ':', ' ');
+        std::istringstream linestream(line);
+        linestream >> username >> x >> uid1 >> uid2;
+        if(uid == uid1 && uid == uid2){
+          break;
+        }
+      }
+    }
+  return username;
+ }
 
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0;  }
+long LinuxParser::UpTime(int pid) { 
+    string line;
+    string value;
+    long clockTicks;
+    int count = 0;
+    std::ifstream stream(kProcDirectory+"/"+to_string(pid)+ kStatFilename);
+    if (stream.is_open()) {
+      while(std::getline(stream, line)){
+        std::istringstream linestream(line);
+        while(linestream >> value){
+          count++;
+          if(count == 22){
+           std::string::size_type size;
+           clockTicks = std::stol(value,&size);
+           break;
+          }
+        }
+        break;
+      }
+    }
+  return clockTicks/sysconf(_SC_CLK_TCK);
+}

@@ -10,26 +10,26 @@ using namespace std;
 float Processor::Utilization() { 
     vector<string> processorData = LinuxParser::CpuUtilization();
    
-    int user = atoi(processorData[0].c_str());
-    int nice = atoi(processorData[1].c_str());
-    int system = atoi(processorData[2].c_str());
-    int idle = atoi(processorData[3].c_str());
-    int iowait = atoi(processorData[4].c_str());
-    int irq = atoi(processorData[5].c_str());
-    int softirq = atoi(processorData[6].c_str());
-    int steal = atoi(processorData[7].c_str());
-    int guest = atoi(processorData[8].c_str());
-    int guestNice = atoi(processorData[9].c_str());
+    long user = atoi(processorData[0].c_str());
+    long nice = atoi(processorData[1].c_str());
+    long system = atoi(processorData[2].c_str());
+    long idle = atoi(processorData[3].c_str());
+    long iowait = atoi(processorData[4].c_str());
+    long irq = atoi(processorData[5].c_str());
+    long softirq = atoi(processorData[6].c_str());
+    long steal = atoi(processorData[7].c_str());
+    long guest = atoi(processorData[8].c_str());
+    long guestNice = atoi(processorData[9].c_str());
 
-    int usertime = user - guest;
-    int nicetime = nice - guestNice;
+    long usertime = user - guest;
+    long nicetime = nice - guestNice;
 
-    int idletime = idle + iowait;
-    int systemtime = system + irq + softirq;
-    int virtualtime = guest + guestNice;
-    int totaltime = usertime + nicetime + systemtime + idletime + steal + virtualtime;
+    long idletime = idle + iowait;
+    long systemtime = system + irq + softirq;
+    long virtualtime = guest + guestNice;
+    long  totaltime = usertime + nicetime + systemtime + idletime + steal + virtualtime;
 
-    float percentage = ((totaltime * 1.0 - idletime* 1.0 ))/ totaltime * 1.0;
+    float percentage = ((totaltime - idletime) * 1.0/ totaltime * 1.0) ;
 
     return percentage; 
     
