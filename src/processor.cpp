@@ -6,7 +6,7 @@
 using namespace std;
 
 
-// TODO: Return the aggregate CPU utilization
+// Return the aggregate CPU utilization
 float Processor::Utilization() { 
     vector<string> processorData = LinuxParser::CpuUtilization();
    
@@ -18,18 +18,23 @@ float Processor::Utilization() {
     long irq = atoi(processorData[5].c_str());
     long softirq = atoi(processorData[6].c_str());
     long steal = atoi(processorData[7].c_str());
-    long guest = atoi(processorData[8].c_str());
-    long guestNice = atoi(processorData[9].c_str());
 
-    long usertime = user - guest;
-    long nicetime = nice - guestNice;
 
-    long idletime = idle + iowait;
-    long systemtime = system + irq + softirq;
-    long virtualtime = guest + guestNice;
-    long  totaltime = usertime + nicetime + systemtime + idletime + steal + virtualtime;
 
-    float percentage = ((totaltime - idletime) * 1.0/ totaltime * 1.0) ;
+    long currentIdle = idle + iowait;
+
+    long currentNonIdle = user + nice + system + irq + softirq + steal;
+
+    long currentTotal = currentIdle + currentNonIdle;
+
+    long totalDiff = currentTotal - prevTotal_;
+    long idleDiff = currentIdle - prevIdle_;
+
+    float percentage = (float(totalDiff - idleDiff)/ totalDiff) ;
+
+    prevIdle_ = currentIdle;
+    prevNonIdle_ = currentNonIdle;
+    prevTotal_ = currentTotal;
 
     return percentage; 
     
