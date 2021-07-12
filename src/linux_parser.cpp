@@ -101,11 +101,11 @@ float LinuxParser::MemoryUtilization() {
     while(std::getline(filestream,line)){
       std::istringstream linestream(line);
       while(linestream >> key >>value){
-        if(key == "MemTotal:"){
+        if(key == kFilterMemTotal){
           totalMemory = value;
           count++; 
         }
-        else if(key == "MemAvailable:"){
+        else if(key == kFilterMemAvailable){
           availableMemory = value;
           count++;
         }
@@ -140,7 +140,7 @@ long LinuxParser::UpTime() {
   }
 
 // Get process CPU usage
-float LinuxParser::ProcessCpuUsage(int pid){
+double LinuxParser::ProcessCpuUsage(int pid){
 
 
   string line;
@@ -169,17 +169,16 @@ float LinuxParser::ProcessCpuUsage(int pid){
   
  
   }
-  // total time spent for the process
+  // Total time spent for the process
   long totalTime = utime + stime + cutime + cstime;
 
-  // total time in seconds
+  // Total time in seconds
   long totalTimeInSeconds = totalTime /sysconf(_SC_CLK_TCK);
 
 
-  //cpu usage in percentage
-  float usage =  (float)totalTimeInSeconds /uptime;
+  // Return cpu usage in percentage
+  return static_cast<double>(totalTimeInSeconds) /uptime;
 
-  return usage;
   
 }
 
@@ -194,7 +193,7 @@ long LinuxParser::Jiffies() {
      while(std::getline(filestream, line)){
       std::istringstream linestream(line);
       linestream >> cpu;
-      if(cpu == "cpu"){
+      if(cpu == kFilterCpu){
         while(linestream >> value){
           jiffies += value;
         }
@@ -297,7 +296,7 @@ vector<string> LinuxParser::CpuUtilization() {
         while(std::getline(stream, line)){
         std::istringstream linestream(line);
         linestream >> cpu;
-        if(cpu == "cpu"){
+        if(cpu == kFilterCpu){
           while(linestream >> value){
             cpuData.emplace_back(value);
           }
@@ -318,7 +317,7 @@ int LinuxParser::TotalProcesses() {
     while(std::getline(filestream,line)){
       std::istringstream linestream(line);
       while(linestream >> key >> value){
-        if(key == "processes"){
+        if(key == kFilterProcesses){
           return value;
         }
       }
@@ -337,7 +336,7 @@ int LinuxParser::RunningProcesses() {
       while(std::getline(filestream,line)){
         std::istringstream linestream(line);
         while(linestream >> key >> value){
-          if(key == "procs_running"){
+          if(key == kFilterProcsRun){
             return value;
           }
         }
@@ -367,7 +366,7 @@ string LinuxParser::Ram(int pid) {
       while(std::getline(stream, line)){
         std::istringstream linestream(line);
         linestream >> key >> value;
-        if(key == "vmSize:"){
+        if(key == kFilterRam){
           break;
         }
       }
@@ -386,7 +385,7 @@ string LinuxParser::Uid(int pid) {
       while(std::getline(stream, line)){
         std::istringstream linestream(line);
         linestream >> key >> value;
-        if(key == "Uid:"){
+        if(key == kFilterUid){
           break;
         }
       }

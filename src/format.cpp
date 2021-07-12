@@ -4,10 +4,7 @@
 
 using std::string;
 using std::to_string;
-// TODO: Complete this helper function
-// INPUT: Long int measuring seconds
-// OUTPUT: HH:MM:SS
-// REMOVE: [[maybe_unused]] once you define the function
+// Returns formatted string in HH:MM:SS
 string Format::ElapsedTime(long seconds) { 
     int totalMinutes = seconds/60;
     int remainingSeconds = seconds % 60;

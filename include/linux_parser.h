@@ -19,6 +19,13 @@ const std::string kMeminfoFilename{"/meminfo"};
 const std::string kVersionFilename{"/version"};
 const std::string kOSPath{"/etc/os-release"};
 const std::string kPasswordPath{"/etc/passwd"};
+const std::string kFilterRam{"VmSize:"};
+const std::string kFilterMemTotal{"MemTotal:"};
+const std::string kFilterMemAvailable{"MemAvailable:"};
+const std::string kFilterCpu{"cpu"};
+const std::string kFilterProcesses{"processes"};
+const std::string kFilterProcsRun("procs_running");
+const std::string kFilterUid{"Uid:"};
 
 // System
 float MemoryUtilization();
@@ -55,7 +62,7 @@ std::string Ram(int pid);
 std::string Uid(int pid);
 std::string User(int pid);
 long int UpTime(int pid);
-float ProcessCpuUsage(int pid);
+double ProcessCpuUsage(int pid);
 };  // namespace LinuxParser
 
 #endif

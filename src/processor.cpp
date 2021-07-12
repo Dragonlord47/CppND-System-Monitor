@@ -7,7 +7,7 @@ using namespace std;
 
 
 // Return the aggregate CPU utilization
-float Processor::Utilization() { 
+double Processor::Utilization() { 
     vector<string> processorData = LinuxParser::CpuUtilization();
    
     long user = atoi(processorData[0].c_str());
@@ -30,7 +30,7 @@ float Processor::Utilization() {
     long totalDiff = currentTotal - prevTotal_;
     long idleDiff = currentIdle - prevIdle_;
 
-    float percentage = (float(totalDiff - idleDiff)/ totalDiff) ;
+    float percentage = (static_cast<double>(totalDiff - idleDiff)/ totalDiff) ;
 
     prevIdle_ = currentIdle;
     prevNonIdle_ = currentNonIdle;
