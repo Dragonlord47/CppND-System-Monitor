@@ -23,7 +23,7 @@ float Process::CpuUtilization() const{
  }
 
 // returns process command
-string Process::Command() { return LinuxParser::Command(processId_)...; }
+string Process::Command() { return LinuxParser::Command(processId_); }
 
 // returns process memory usage in megabytes
 string Process::Ram() { return LinuxParser::Ram(processId_); }
