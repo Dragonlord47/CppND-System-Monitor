@@ -13,7 +13,7 @@ string Format::ElapsedTime(long seconds) {
     int remainingSeconds = seconds % 60;
     int hours = totalMinutes / 60;
     int remainingMinutes = totalMinutes % 60;
-    return to_string(hours)+":"+to_string(remainingMinutes)+":"+(remainingSeconds < 10 ? "0"+to_string(remainingSeconds).substr(0,1) :to_string(remainingSeconds));
+    return hours > 9 ? to_string(hours) :  (hours == 0 ? "00" : "0"+to_string(hours))+":"+(remainingMinutes > 9 ? to_string(remainingMinutes) : "0"+to_string(remainingMinutes))+":"+(remainingSeconds < 10 ? "0"+to_string(remainingSeconds).substr(0,1) :to_string(remainingSeconds));
     
     
 }

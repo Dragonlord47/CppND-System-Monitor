@@ -5,6 +5,7 @@
 #include <regex>
 #include <string>
 #include <process.h>
+#include <filesystem>
 
 namespace LinuxParser {
 // Paths
